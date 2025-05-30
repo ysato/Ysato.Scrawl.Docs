@@ -1,0 +1,46 @@
+erDiagram
+    "User (R)" {
+        string id PK "ユーザーID"
+        string name "ユーザー名"
+    }
+
+    "Thread (R)" {
+        string id PK "ThreadのID"
+        string title "Threadの現在のタイトル"
+        string status "Threadの現在の状態 (OPEN/CLOSED)"
+        string createdByUserId FK "Thread作成ユーザーID (User(R).id参照)"
+        datetime createdAt "Thread作成日時"
+        datetime lastActivityAt "Thread最終アクティビティ日時"
+    }
+
+    "Scratch (R)" {
+        string id PK "ScratchのID"
+        string threadId FK "対応する Thread (R) のID"
+        string content "Scratchの現在の内容 (Markdown)"
+    }
+
+    "ThreadActivityEvent (E)" {
+        string id PK "イベントID (スーパータイプ)"
+        string threadId FK "対象ThreadのID"
+        datetime activityDateTime "活動発生日時"
+    }
+
+    "ThreadCreated (E)" {
+        string eventId PK "イベントID (ThreadActivityEvent.idと同じ)"
+    }
+
+    "ScratchAdded (E)" {
+        string eventId PK "イベントID (ThreadActivityEvent.idと同じ)"
+    }
+
+    "ThreadClosed (E)" {
+        string eventId PK "イベントID (ThreadActivityEvent.idと同じ)"
+    }
+
+    "User (R)" ||--o{ "Thread (R)": "creates"
+    "Thread (R)" ||--o{ "Scratch (R)": "contains"
+    "Thread (R)" ||--o{ "ThreadActivityEvent (E)": "is subject of"
+    "Scratch (R)" o|--|| "ScratchAdded (E)": "defines"
+    "ThreadActivityEvent (E)" o|--|| "ThreadCreated (E)": "type of"
+    "ThreadActivityEvent (E)" o|--|| "ScratchAdded (E)": "type of"
+    "ThreadActivityEvent (E)" o|--|| "ThreadClosed (E)": "type of"
