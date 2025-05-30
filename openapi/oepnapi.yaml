@@ -1,0 +1,559 @@
+openapi: 3.0.0
+info:
+  title: Scrap Application API
+  version: 1.0.0
+  description: |
+    Zennのスクラップ機能を模したWebアプリケーションのAPI仕様書です。
+    Laravelをバックエンド、Next.jsをフロントエンドとする構成を想定しています。
+servers:
+  - url: http://localhost:8000/api # 開発環境のベースURL例
+    description: Development server
+
+paths:
+  /threads:
+    get:
+      summary: スレッド一覧取得
+      operationId: getThreads
+      tags:
+        - Threads
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: ページ番号
+        - in: query
+          name: per_page
+          schema:
+            type: integer
+            default: 10
+          description: 1ページあたりの表示件数
+        - in: query
+          name: sort
+          schema:
+            type: string
+            enum: [ newest, oldest, latest_comment ] # ソート順の例
+            default: newest
+          description: ソート順 (新着順、古い順、最終コメント順など)
+      responses:
+        '200':
+          description: スレッド一覧
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ThreadListItem'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+
+    post:
+      summary: 新規スレッド作成
+      operationId: createThread
+      tags:
+        - Threads
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+              properties:
+                title:
+                  type: string
+                  description: スレッドのタイトル
+                  maxLength: 255
+                  example: 初めてのスレッド
+      responses:
+        '201':
+          description: Thread created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Thread created successfully.
+                  thread:
+                    $ref: '#/components/schemas/Thread'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /threads/{threadId}:
+    get:
+      summary: スレッド詳細取得
+      operationId: getThreadById
+      tags:
+        - Threads
+      parameters:
+        - in: path
+          name: threadId
+          schema:
+            type: integer
+          required: true
+          description: スレッドID
+      responses:
+        '200':
+          description: スレッド詳細と関連するスクラッチ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThreadDetail'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      summary: スレッド更新 (タイトル編集)
+      operationId: updateThread
+      tags:
+        - Threads
+      parameters:
+        - in: path
+          name: threadId
+          schema:
+            type: integer
+          required: true
+          description: 更新対象のスレッドID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+              properties:
+                title:
+                  type: string
+                  description: 新しいスレッドのタイトル
+                  maxLength: 255
+                  example: 更新されたスレッドタイトル
+      responses:
+        '200':
+          description: Thread updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Thread updated successfully.
+                  thread:
+                    $ref: '#/components/schemas/Thread'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+    delete:
+      summary: スレッド削除
+      operationId: deleteThread
+      tags:
+        - Threads
+      parameters:
+        - in: path
+          name: threadId
+          schema:
+            type: integer
+          required: true
+          description: 削除対象のスレッドID
+      responses:
+        '204':
+          description: Thread deleted successfully (No Content)
+        '200':
+          description: Thread deleted successfully (Message)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Thread deleted successfully.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /threads/{threadId}/status:
+    patch:
+      summary: スレッドのOpen/Closed切り替え
+      operationId: updateThreadStatus
+      tags:
+        - Threads
+      parameters:
+        - in: path
+          name: threadId
+          schema:
+            type: integer
+          required: true
+          description: ステータスを切り替えるスレッドID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - is_closed
+              properties:
+                is_closed:
+                  type: boolean
+                  description: trueでClosed、falseでOpen
+                  example: true
+      responses:
+        '200':
+          description: Thread status updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Thread status updated successfully.
+                  thread:
+                    $ref: '#/components/schemas/Thread'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /threads/{threadId}/scratches:
+    post:
+      summary: スクラッチ追加 (コメント)
+      operationId: addScratch
+      tags:
+        - Scratches
+      parameters:
+        - in: path
+          name: threadId
+          schema:
+            type: integer
+          required: true
+          description: スクラッチを追加するスレッドID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - content
+              properties:
+                content:
+                  type: string
+                  description: スクラッチの本文 (Markdown)
+                  example: これは新しいコメントです。
+      responses:
+        '201':
+          description: Scratch added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Scratch added successfully.
+                  scratch:
+                    $ref: '#/components/schemas/Scratch'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError' # スレッド作成者以外がコメントしようとした場合
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /scratches/{scratchId}:
+    put:
+      summary: スクラッチ更新 (コメント編集)
+      operationId: updateScratch
+      tags:
+        - Scratches
+      parameters:
+        - in: path
+          name: scratchId
+          schema:
+            type: integer
+          required: true
+          description: 更新対象のスクラッチID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - content
+              properties:
+                content:
+                  type: string
+                  description: 新しいスクラッチの本文 (Markdown)
+                  example: 修正後のコメントです。
+      responses:
+        '200':
+          description: Scratch updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Scratch updated successfully.
+                  scratch:
+                    $ref: '#/components/schemas/Scratch'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+    delete:
+      summary: スクラッチ削除 (コメント削除)
+      operationId: deleteScratch
+      tags:
+        - Scratches
+      parameters:
+        - in: path
+          name: threadId
+          schema:
+            type: integer
+          required: true
+          description: 対象のスレッドID
+        - in: path
+          name: scratchId
+          schema:
+            type: integer
+          required: true
+          description: 削除対象のスクラッチID
+      responses:
+        '204':
+          description: Scratch deleted successfully (No Content)
+        '200':
+          description: Scratch deleted successfully (Message)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Scratch deleted successfully.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: testuser
+      # emailなどのフィールドは最小構成のため省略
+
+    Thread:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 101
+        user_id:
+          type: integer
+          example: 1
+        user_name:
+          type: string
+          description: スレッド作成者名 (JOINして取得)
+          example: testuser
+        title:
+          type: string
+          example: 技術ブログの記事構成について
+        is_closed:
+          type: boolean
+          description: 'トピックの進行状況 (true: Closed, false: Open)'
+          example: false
+        created_at:
+          type: string
+          format: date-time
+          example: '2025-05-30T10:00:00Z'
+        last_scratch_created_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2025-05-30T10:30:00Z'
+        last_closed_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2025-05-30T11:00:00Z'
+      # updated_at は Laravel のタイムスタンプ管理に任せる
+
+    ThreadListItem:
+      allOf:
+        - $ref: '#/components/schemas/Thread'
+        - type: object
+          properties:
+          # スレッド一覧で表示される追加情報があればここに記載
+          # 例: scratch_count: { type: integer, example: 5 }
+
+    Scratch:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 201
+        thread_id:
+          type: integer
+          example: 101
+        content:
+          type: string
+          description: スクラッチ本文 (Markdown)
+          example: |
+            ## コメント1
+            これはMarkdown形式のコメントです。
+
+            - リストアイテム1
+            - リストアイテム2
+
+            ```python
+            print("Hello, World!")
+            ```
+        created_at:
+          type: string
+          format: date-time
+          example: '2025-05-30T10:15:00Z'
+        updated_at:
+          type: string
+          format: date-time
+          example: '2025-05-30T10:45:00Z'
+
+    ThreadDetail:
+      allOf:
+        - $ref: '#/components/schemas/Thread'
+        - type: object
+          properties:
+            scratches:
+              type: array
+              items:
+                $ref: '#/components/schemas/Scratch'
+              description: このスレッドに属するスクラッチ (古いものが上)
+
+    PaginationMeta:
+      type: object
+      properties:
+        current_page:
+          type: integer
+          example: 1
+        from:
+          type: integer
+          nullable: true
+          example: 1
+        last_page:
+          type: integer
+          example: 5
+        links: # 省略可能だが、ページネーションリンクを含むことが多い
+          type: array
+          items:
+            type: object
+            properties:
+              url: { type: string, nullable: true }
+              label: { type: string }
+              active: { type: boolean }
+        path:
+          type: string
+          example: http://localhost:8000/api/threads
+        per_page:
+          type: integer
+          example: 10
+        to:
+          type: integer
+          nullable: true
+          example: 10
+        total:
+          type: integer
+          example: 50
+
+  responses:
+    UnauthorizedError:
+      description: 認証が必要です (トークンなし、または無効なトークン)
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Unauthenticated.
+    ForbiddenError:
+      description: 権限がありません (リソースの作成者ではないなど)
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: This action is unauthorized.
+    NotFound:
+      description: リソースが見つかりません
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Resource not found.
+    ValidationError:
+      description: リクエストの入力値が不正です
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: The given data was invalid.
+              errors:
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+                example:
+                  title: [ "The title field is required." ]
+                  content: [ "The content field must be at least 10 characters." ]
