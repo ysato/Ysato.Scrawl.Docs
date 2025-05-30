@@ -1,0 +1,26 @@
+erDiagram
+    "users" {
+        string id PK
+        string name
+    }
+
+    "threads" {
+        string id PK
+        string user_id FK
+        string title
+        boolean is_closed
+        timestamp created_at
+        timestamp last_scratch_created_at
+        timestamp last_closed_at
+    }
+
+    "scratches" {
+        int id PK
+        string thread_id FK
+        string content "本文 (Markdown)"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    "users" ||--o{ "threads": "creates"
+    "threads" ||--o{ "scratches": "contains"
