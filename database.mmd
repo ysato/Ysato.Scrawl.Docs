@@ -1,12 +1,12 @@
 erDiagram
     "users" {
-        string id PK
+        int id PK
         string name
     }
 
     "threads" {
         string id PK
-        string user_id FK
+        int user_id FK
         string title
         boolean is_closed
         timestamp created_at
@@ -16,7 +16,7 @@ erDiagram
 
     "scratches" {
         int id PK
-        string thread_id FK
+        int thread_id FK
         string content "本文 (Markdown)"
         timestamp created_at
         timestamp updated_at
