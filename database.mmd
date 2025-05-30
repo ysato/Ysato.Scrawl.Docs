@@ -1,6 +1,6 @@
 erDiagram
     "users" {
-        string id PK
+        int id PK
         string name
     }
 
@@ -16,7 +16,7 @@ erDiagram
 
     "scratches" {
         int id PK
-        string thread_id FK
+        int thread_id FK
         string content "本文 (Markdown)"
         timestamp created_at
         timestamp updated_at
