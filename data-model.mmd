@@ -25,15 +25,12 @@ erDiagram
     }
 
     "ThreadCreated (E)" {
-        string eventId PK "イベントID (ThreadActivityEvent.idと同じ)"
     }
 
     "ScratchAdded (E)" {
-        string eventId PK "イベントID (ThreadActivityEvent.idと同じ)"
     }
 
     "ThreadClosed (E)" {
-        string eventId PK "イベントID (ThreadActivityEvent.idと同じ)"
     }
 
     "User (R)" ||--o{ "Thread (R)": "creates"
