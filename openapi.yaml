@@ -16,24 +16,11 @@ paths:
         - Threads
       parameters:
         - in: query
-          name: page
-          schema:
-            type: integer
-            default: 1
-          description: ページ番号
-        - in: query
-          name: per_page
-          schema:
-            type: integer
-            default: 10
-          description: 1ページあたりの表示件数
-        - in: query
-          name: sort
+          name: cursor
           schema:
             type: string
-            enum: [ newest, oldest, latest_comment ] # ソート順の例
-            default: newest
-          description: ソート順 (新着順、古い順、最終コメント順など)
+          required: false
+          description: ページネーション用のカーソル
       responses:
         '200':
           description: スレッド一覧
