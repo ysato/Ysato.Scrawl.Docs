@@ -45,7 +45,9 @@ paths:
                   - $ref: '#/components/schemas/PaginationMeta'
                   - properties:
                       items:
-                        $ref: '#/components/schemas/ThreadListItem'
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ThreadListItem'
 
     post:
       summary: 新規スレッド作成
@@ -383,9 +385,9 @@ components:
       type: object
       properties:
         self:
-            type: string
-            nullable: true
-            format: uri|cursor
+          type: string
+          nullable: true
+          format: uri|cursor
         prev:
           type: string
           nullable: true
