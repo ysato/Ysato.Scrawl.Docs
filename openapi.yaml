@@ -391,60 +391,76 @@ components:
         application/problem+json:
           schema:
             type: object
-            required: [ title, instance ]
             properties:
               title:
                 type: string
                 example: Unauthenticated.
-              instance:
+              status:
+                type: integer
+                format: int32
+                minimum: 100
+                maximum: 600
+                exclusiveMaximum: true
+              detail:
                 type: string
-                format: uri-reference
-                example: /aaa/bbb/ccc
+                example: some description for the error situation
     ForbiddenError:
       description: 権限がありません (リソースの作成者ではないなど)
       content:
         application/problem+json:
           schema:
             type: object
-            required: [ title, instance ]
             properties:
               title:
                 type: string
                 example: This action is unauthorized.
-              instance:
+              status:
+                type: integer
+                format: int32
+                minimum: 100
+                maximum: 600
+                exclusiveMaximum: true
+              detail:
                 type: string
-                format: uri-reference
-                example: /aaa/bbb/ccc
+                example: some description for the error situation
     NotFound:
       description: リソースが見つかりません
       content:
         application/problem+json:
           schema:
             type: object
-            required: [ title, instance ]
             properties:
               title:
                 type: string
                 example: Resource not found.
-              instance:
+              status:
+                type: integer
+                format: int32
+                minimum: 100
+                maximum: 600
+                exclusiveMaximum: true
+              detail:
                 type: string
-                format: uri-reference
-                example: /aaa/bbb/ccc
+                example: some description for the error situation
     ValidationError:
       description: リクエストの入力値が不正です
       content:
         application/problem+json:
           schema:
             type: object
-            required: [ title, instance, errors ]
             properties:
               title:
                 type: string
                 example: The given data was invalid.
-              instance:
+              status:
+                type: integer
+                format: int32
+                minimum: 100
+                maximum: 600
+                exclusiveMaximum: true
+              detail:
                 type: string
-                format: uri-reference
-                example: /aaa/bbb/ccc
+                example: some description for the error situation
               errors:
                 type: object
                 additionalProperties:
