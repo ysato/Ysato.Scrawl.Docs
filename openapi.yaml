@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Scrawl API
-  version: 0.1.0
+  version: 0.1.1
   description: ScrawlのAPI仕様書です。
 servers:
   - url: http://localhost:8000 # 開発環境のベースURL例
@@ -267,6 +267,9 @@ components:
   schemas:
     User:
       type: object
+      required:
+        - id
+        - name
       properties:
         id:
           type: integer
@@ -278,6 +281,14 @@ components:
 
     Thread:
       type: object
+      required:
+        - id
+        - user_id
+        - title
+        - is_closed
+        - created_at
+        - last_scratch_created_at
+        - last_closed_at
       properties:
         id:
           type: integer
@@ -310,6 +321,12 @@ components:
 
     Scratch:
       type: object
+      required:
+        - id
+        - thread_id
+        - content
+        - created_at
+        - updated_at
       properties:
         id:
           type: integer
@@ -343,6 +360,9 @@ components:
       allOf:
         - $ref: '#/components/schemas/Thread'
         - type: object
+          required:
+            - scratches
+            - user
           properties:
             scratches:
               type: array
@@ -358,6 +378,9 @@ components:
       allOf:
         - $ref: '#/components/schemas/Thread'
         - type: object
+          required:
+            - scratches_count
+            - user
           properties:
             scratches_count:
               type: integer
@@ -370,6 +393,10 @@ components:
 
     PaginationMeta:
       type: object
+      required:
+        - self
+        - prev
+        - next
       properties:
         self:
           type: string
