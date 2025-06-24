@@ -63,8 +63,8 @@ paths:
               description: 作成されたスレッドのURL
               schema:
                 type: string
-                format: uri
-                example: http://localhost:8000/threads/101
+                format: uri-reference
+                example: /threads/101
           content:
             application/json:
               schema:
@@ -183,8 +183,8 @@ paths:
               description: 作成されたスクラッチのURL
               schema:
                 type: string
-                format: uri
-                example: http://localhost:8000/threads/101/scratches/201
+                format: uri-reference
+                example: /threads/101/scratches/201
           content:
             application/json:
               schema:
