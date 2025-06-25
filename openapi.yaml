@@ -224,7 +224,10 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Scratch'
+              type: object
+              properties:
+                content:
+                  $ref: "#/components/schemas/Scratch/properties/content"
       responses:
         '204':
           description: Scratch updated successfully (No Content)
