@@ -51,10 +51,7 @@ paths:
                 - title
               properties:
                 title:
-                  type: string
-                  description: スレッドのタイトル
-                  maxLength: 255
-                  example: 初めてのスレッド
+                  $ref: '#/components/schemas/Thread/properties/title'
       responses:
         '201':
           description: Thread created successfully
@@ -84,7 +81,7 @@ paths:
         - in: path
           name: threadId
           schema:
-            type: integer
+            $ref: '#/components/schemas/Thread/properties/id'
           required: true
           description: スレッドID
       responses:
@@ -106,7 +103,7 @@ paths:
         - in: path
           name: threadId
           schema:
-            type: integer
+            $ref: '#/components/schemas/Thread/properties/id'
           required: true
           description: 更新対象のスレッドID
       requestBody:
@@ -114,7 +111,12 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Thread'
+              type: object
+              properties:
+                title:
+                  $ref: '#/components/schemas/Thread/properties/title'
+                is_closed:
+                  $ref: '#/components/schemas/Thread/properties/is_closed'
       responses:
         '204':
           description: Thread updated successfully (No Content)
@@ -136,7 +138,7 @@ paths:
         - in: path
           name: threadId
           schema:
-            type: integer
+            $ref: '#/components/schemas/Thread/properties/id'
           required: true
           description: 削除対象のスレッドID
       responses:
@@ -159,7 +161,7 @@ paths:
         - in: path
           name: threadId
           schema:
-            type: integer
+            $ref: '#/components/schemas/Thread/properties/id'
           required: true
           description: スクラッチを追加するスレッドID
       requestBody:
@@ -208,13 +210,13 @@ paths:
         - in: path
           name: threadId
           schema:
-            type: integer
+            $ref: '#/components/schemas/Thread/properties/id'
           required: true
           description: 更新対象のスレッドID
         - in: path
           name: scratchId
           schema:
-            type: integer
+            $ref: '#/components/schemas/Scratch/properties/id'
           required: true
           description: 更新対象のスクラッチID
       requestBody:
@@ -244,13 +246,13 @@ paths:
         - in: path
           name: threadId
           schema:
-            type: integer
+            $ref: '#/components/schemas/Thread/properties/id'
           required: true
           description: 削除対象のスレッドID
         - in: path
           name: scratchId
           schema:
-            type: integer
+            $ref: '#/components/schemas/Scratch/properties/id'
           required: true
           description: 削除対象のスクラッチID
       responses:
@@ -298,6 +300,8 @@ components:
           example: 1
         title:
           type: string
+          maxLength: 255
+          exclusiveMaximum: false
           example: 技術ブログの記事構成について
         is_closed:
           type: boolean
@@ -332,8 +336,7 @@ components:
           type: integer
           example: 201
         thread_id:
-          type: integer
-          example: 101
+          $ref: '#/components/schemas/Thread/properties/id'
         content:
           type: string
           description: スクラッチ本文 (Markdown)
