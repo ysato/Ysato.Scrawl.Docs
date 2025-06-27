@@ -313,18 +313,17 @@ components:
         created_at:
           type: string
           format: date-time
-          example: '2025-05-30T10:00:00Z'
+          example: '2025-05-30T10:00:00+09:00'
         last_scratch_created_at:
           type: string
           format: date-time
           nullable: true
-          example: '2025-05-30T10:30:00Z'
+          example: '2025-05-30T10:30:00+09:00'
         last_closed_at:
           type: string
           format: date-time
           nullable: true
-          example: '2025-05-30T11:00:00Z'
-      # updated_at は Laravel のタイムスタンプ管理に任せる
+          example: '2025-05-30T11:00:00+09:00'
 
     Scratch:
       type: object
@@ -356,11 +355,11 @@ components:
         created_at:
           type: string
           format: date-time
-          example: '2025-05-30T10:15:00Z'
+          example: '2025-05-30T10:15:00+09:00'
         updated_at:
           type: string
           format: date-time
-          example: '2025-05-30T10:45:00Z'
+          example: '2025-05-30T10:45:00+09:00'
 
     ThreadDetail:
       allOf:
